@@ -7,8 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="glass-container" id="mainContainer">
@@ -60,9 +59,17 @@
             <div class="action-section edit-only" style="margin-top: 40px; border-top: 2px dashed #ff9a9e; padding-top: 20px;">
                 <p style="font-size: 0.9em;">(Area ini hanya terlihat olehmu untuk menyimpan & share link)</p>
                 <button class="btn save-btn" onclick="saveAndShare()">Simpan & Buat Link Share</button>
+                <div id="progressContainer" style="display: none; margin: 15px 0;">
+                    <div style="background: rgba(255,255,255,0.5); border-radius: 10px; overflow: hidden; height: 20px;">
+                        <div id="progressBar" style="background: #ff477e; height: 100%; width: 0%; transition: width 0.3s; border-radius: 10px;"></div>
+                    </div>
+                    <p id="progressText" style="font-size: 0.85em; margin-top: 5px;">Mengupload foto...</p>
+                </div>
                 <p id="shareLinkContainer" style="display: none;">
                     Bagikan link ini: <br>
-                    <a href="#" id="shareLink" target="_blank" style="color: #ff3366; font-weight: bold;"></a>
+                    <a href="#" id="shareLink" target="_blank" style="color: #ff3366; font-weight: bold; word-break: break-all;"></a>
+                    <br><br>
+                    <button class="btn" onclick="copyLink()" style="font-size: 0.9em; padding: 8px 20px;">📋 Copy Link</button>
                 </p>
             </div>
         </div>

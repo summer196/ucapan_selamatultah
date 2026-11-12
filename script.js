@@ -1,40 +1,50 @@
-const firebaseConfig = {
-    apiKey: "GANTI_DENGAN_API_KEY_ANDA",
-    authDomain: "GANTI_DENGAN_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://GANTI_DENGAN_PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "GANTI_DENGAN_PROJECT_ID"
-};
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
+// =============================================
+// SUPABASE CONFIG
+// =============================================
+const SUPABASE_URL = 'https://iqokqdzsvezrapqtrecg.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_h-yn14F5rf8QNATaMejR_g_NVcu4nFb';
 
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// =============================================
+// INIT
+// =============================================
 window.onload = () => {
-    for(let i=0; i<4; i++) addGallerySlot();
+    for (let i = 0; i < 4; i++) addGallerySlot();
     checkUrlMode();
 };
 
+// =============================================
+// NAVIGASI LAYER
+// =============================================
 function nextLayer(layerNumber) {
     document.querySelectorAll('.layer').forEach(layer => layer.classList.remove('active'));
     document.getElementById('layer' + layerNumber).classList.add('active');
-    if(layerNumber !== 5) confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } }); // Confetti kecil tiap next
+    if (layerNumber !== 5) confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
 }
 
+// =============================================
+// MINI GAME — Tombol Kabur
+// =============================================
 let dodgeCount = 0;
 function dodgeButton() {
-    // Tombol hanya lari 3 kali di Mode Lihat agar tidak frustasi
     if (document.body.classList.contains('view-mode') && dodgeCount < 3) {
         const btn = document.getElementById('runawayBtn');
         const container = document.getElementById('layer3');
         const maxX = container.clientWidth - btn.clientWidth;
         const maxY = container.clientHeight - btn.clientHeight;
-        
+
         btn.style.position = 'absolute';
         btn.style.left = Math.floor(Math.random() * maxX) + 'px';
         btn.style.top = Math.floor(Math.random() * maxY) + 'px';
         dodgeCount++;
-        if(dodgeCount === 3) btn.innerHTML = "Yaudah deh, nyerah. Boleh klik! 🙄";
+        if (dodgeCount === 3) btn.innerHTML = "Yaudah deh, nyerah. Boleh klik! 🙄";
     }
 }
 
+// =============================================
+// GALERI & FOTO
+// =============================================
 function addGallerySlot() {
     const grid = document.getElementById('galleryGrid');
     const slot = document.createElement('div');
@@ -46,7 +56,7 @@ function addGallerySlot() {
 function previewImage(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             const img = input.nextElementSibling;
             img.src = e.target.result;
             img.style.display = 'block';
@@ -55,6 +65,193 @@ function previewImage(input) {
     }
 }
 
+// =============================================
+// UPLOAD FOTO KE SUPABASE STORAGE
+// =============================================
+async function uploadPhoto(file, folder, index) {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${folder}/${Date.now()}_${index}.${fileExt}`;
+
+    const { data, error } = await supabase.storage
+        .from('birthday-photos')
+        .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+        });
+
+    if (error) {
+        console.error('Upload error:', error);
+        throw error;
+    }
+
+    const { data: urlData } = supabase.storage
+        .from('birthday-photos')
+        .getPublicUrl(fileName);
+
+    return urlData.publicUrl;
+}
+
+// =============================================
+// SIMPAN & BUAT LINK SHARE
+// =============================================
+async function saveAndShare() {
+    showToast("Sedang meracik kejutanmu... ⏳");
+
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    progressContainer.style.display = 'block';
+    progressBar.style.width = '10%';
+
+    try {
+        // 1. Kumpulkan semua file foto
+        const mainFiles = [];
+        document.querySelectorAll('.main-photos .uploader').forEach(input => {
+            if (input.files && input.files[0]) mainFiles.push(input.files[0]);
+        });
+
+        const galleryFiles = [];
+        document.querySelectorAll('.gallery-photos .uploader').forEach(input => {
+            if (input.files && input.files[0]) galleryFiles.push(input.files[0]);
+        });
+
+        const totalFiles = mainFiles.length + galleryFiles.length;
+        let uploaded = 0;
+
+        // 2. Upload semua foto
+        progressText.innerText = `Mengupload foto (0/${totalFiles})...`;
+        const mainPhotoUrls = [];
+        for (let i = 0; i < mainFiles.length; i++) {
+            const url = await uploadPhoto(mainFiles[i], 'main', i);
+            mainPhotoUrls.push(url);
+            uploaded++;
+            progressBar.style.width = (10 + (uploaded / totalFiles) * 60) + '%';
+            progressText.innerText = `Mengupload foto (${uploaded}/${totalFiles})...`;
+        }
+
+        const galleryPhotoUrls = [];
+        for (let i = 0; i < galleryFiles.length; i++) {
+            const url = await uploadPhoto(galleryFiles[i], 'gallery', i);
+            galleryPhotoUrls.push(url);
+            uploaded++;
+            progressBar.style.width = (10 + (uploaded / totalFiles) * 60) + '%';
+            progressText.innerText = `Mengupload foto (${uploaded}/${totalFiles})...`;
+        }
+
+        progressBar.style.width = '80%';
+        progressText.innerText = 'Menyimpan data...';
+
+        // 3. Simpan data teks + URL foto ke Supabase Database
+        const { data, error } = await supabase
+            .from('birthdays')
+            .insert({
+                text1: document.getElementById('text1').innerHTML,
+                sub1: document.getElementById('sub1').innerHTML,
+                text2: document.getElementById('text2').innerHTML,
+                sub2: document.getElementById('sub2').innerHTML,
+                text3: document.getElementById('text3').innerHTML,
+                sub3: document.getElementById('sub3').innerHTML,
+                text4: document.getElementById('text4').innerHTML,
+                sub4: document.getElementById('sub4').innerHTML,
+                text5: document.getElementById('text5').innerHTML,
+                sub5: document.getElementById('sub5').innerHTML,
+                long_message: document.getElementById('longMessage').innerHTML,
+                main_photos: mainPhotoUrls,
+                gallery_photos: galleryPhotoUrls
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        progressBar.style.width = '100%';
+        progressText.innerText = 'Selesai! ✅';
+
+        // 4. Generate link
+        const shareId = data.id;
+        const url = window.location.origin + window.location.pathname + '?id=' + shareId;
+        const linkEl = document.getElementById('shareLink');
+        linkEl.href = url;
+        linkEl.innerText = url;
+        document.getElementById('shareLinkContainer').style.display = 'block';
+        showToast("Berhasil! Copy link di bawah 🎉");
+
+    } catch (err) {
+        console.error('Error:', err);
+        progressBar.style.width = '0%';
+        progressText.innerText = 'Gagal! Coba lagi.';
+        showToast("Gagal menyimpan: " + (err.message || 'Unknown error'));
+    }
+}
+
+// =============================================
+// COPY LINK
+// =============================================
+function copyLink() {
+    const link = document.getElementById('shareLink').innerText;
+    navigator.clipboard.writeText(link).then(() => {
+        showToast("Link berhasil dicopy! 📋");
+    });
+}
+
+// =============================================
+// CEK MODE (EDIT / VIEW)
+// =============================================
+function checkUrlMode() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (id) {
+        document.body.classList.add('view-mode');
+        loadDataFromSupabase(id);
+    }
+}
+
+// =============================================
+// LOAD DATA DARI SUPABASE
+// =============================================
+async function loadDataFromSupabase(id) {
+    const { data, error } = await supabase
+        .from('birthdays')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error || !data) {
+        showToast("Ucapan tidak ditemukan 😢");
+        return;
+    }
+
+    // Load Texts
+    document.getElementById('text1').innerHTML = data.text1;
+    document.getElementById('sub1').innerHTML = data.sub1;
+    document.getElementById('text2').innerHTML = data.text2;
+    document.getElementById('sub2').innerHTML = data.sub2;
+    document.getElementById('text3').innerHTML = data.text3;
+    document.getElementById('sub3').innerHTML = data.sub3;
+    document.getElementById('text4').innerHTML = data.text4;
+    document.getElementById('sub4').innerHTML = data.sub4;
+    document.getElementById('text5').innerHTML = data.text5;
+    document.getElementById('sub5').innerHTML = data.sub5;
+    document.getElementById('longMessage').innerHTML = data.long_message;
+
+    // Load Main Photos
+    const mainGrid = document.getElementById('mainPhotoGrid');
+    mainGrid.innerHTML = '';
+    (data.main_photos || []).forEach(src => {
+        mainGrid.innerHTML += `<div class="photo-slot" style="border:none;"><img src="${src}" class="preview-img" style="display:block;"></div>`;
+    });
+
+    // Load Gallery Photos
+    const galGrid = document.getElementById('galleryGrid');
+    galGrid.innerHTML = '';
+    (data.gallery_photos || []).forEach(src => {
+        galGrid.innerHTML += `<div class="photo-slot" style="border:none;"><img src="${src}" class="preview-img" style="display:block;"></div>`;
+    });
+}
+
+// =============================================
+// TOAST NOTIFICATION
+// =============================================
 function showToast(message) {
     const toast = document.getElementById("toast");
     toast.innerText = message;
@@ -62,66 +259,9 @@ function showToast(message) {
     setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
 }
 
-function saveAndShare() {
-    showToast("Sedang meracik kejutanmu...");
-    const data = {
-        texts: {
-            t1: document.getElementById('text1').innerHTML, s1: document.getElementById('sub1').innerHTML,
-            t2: document.getElementById('text2').innerHTML, s2: document.getElementById('sub2').innerHTML,
-            t3: document.getElementById('text3').innerHTML, s3: document.getElementById('sub3').innerHTML,
-            t4: document.getElementById('text4').innerHTML, s4: document.getElementById('sub4').innerHTML,
-            t5: document.getElementById('text5').innerHTML, s5: document.getElementById('sub5').innerHTML,
-            msg: document.getElementById('longMessage').innerHTML
-        },
-        mainPhotos: [], galleryPhotos: []
-    };
-
-    document.querySelectorAll('.main-photos .preview-img').forEach(img => { if(img.src && img.src !== window.location.href) data.mainPhotos.push(img.src); });
-    document.querySelectorAll('.gallery-photos .preview-img').forEach(img => { if(img.src && img.src !== window.location.href) data.galleryPhotos.push(img.src); });
-
-    const newRef = database.ref('birthdays').push();
-    newRef.set(data).then(() => {
-        const shareId = newRef.key;
-        const url = window.location.origin + window.location.pathname + "?id=" + shareId;
-        const linkEl = document.getElementById('shareLink');
-        linkEl.href = url; linkEl.innerText = url;
-        document.getElementById('shareLinkContainer').style.display = 'block';
-        showToast("Berhasil! Copy link di bawah.");
-    }).catch(error => showToast("Gagal menyimpan."));
-}
-
-function checkUrlMode() {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
-    if (id) {
-        document.body.classList.add('view-mode');
-        loadDataFromFirebase(id);
-    }
-}
-
-function loadDataFromFirebase(id) {
-    database.ref('birthdays/' + id).once('value').then((snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            // Load Texts
-            document.getElementById('text1').innerHTML = data.texts.t1; document.getElementById('sub1').innerHTML = data.texts.s1;
-            document.getElementById('text2').innerHTML = data.texts.t2; document.getElementById('sub2').innerHTML = data.texts.s2;
-            document.getElementById('text3').innerHTML = data.texts.t3; document.getElementById('sub3').innerHTML = data.texts.s3;
-            document.getElementById('text4').innerHTML = data.texts.t4; document.getElementById('sub4').innerHTML = data.texts.s4;
-            document.getElementById('text5').innerHTML = data.texts.t5; document.getElementById('sub5').innerHTML = data.texts.s5;
-            document.getElementById('longMessage').innerHTML = data.texts.msg;
-            
-            // Load Photos
-            const mainGrid = document.getElementById('mainPhotoGrid'); mainGrid.innerHTML = '';
-            (data.mainPhotos || []).forEach(src => mainGrid.innerHTML += `<div class="photo-slot" style="border:none;"><img src="${src}" class="preview-img" style="display:block;"></div>`);
-
-            const galGrid = document.getElementById('galleryGrid'); galGrid.innerHTML = '';
-            (data.galleryPhotos || []).forEach(src => galGrid.innerHTML += `<div class="photo-slot" style="border:none;"><img src="${src}" class="preview-img" style="display:block;"></div>`);
-        }
-    });
-}
-
-// Animasi Khusus
+// =============================================
+// ANIMASI SPESIAL
+// =============================================
 function fireHearts() {
     const defaults = { spread: 360, ticks: 100, gravity: 0, decay: 0.94, startVelocity: 30, shapes: ['heart'], colors: ['#ff477e', '#ff9a9e'] };
     confetti({ ...defaults, particleCount: 50, scalar: 2 });
@@ -129,9 +269,10 @@ function fireHearts() {
 }
 
 function fireworksHeboh() {
-    var duration = 20 * 1000; var animationEnd = Date.now() + duration;
+    var duration = 20 * 1000;
+    var animationEnd = Date.now() + duration;
     var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-    var interval = setInterval(function() {
+    var interval = setInterval(function () {
         var timeLeft = animationEnd - Date.now();
         if (timeLeft <= 0) return clearInterval(interval);
         var particleCount = 60 * (timeLeft / duration);
