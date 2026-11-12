@@ -3,8 +3,16 @@
 // =============================================
 function nextLayer(layerNumber) {
     document.querySelectorAll('.layer').forEach(layer => layer.classList.remove('active'));
-    document.getElementById('layer' + layerNumber).classList.add('active');
-    if (layerNumber !== 5) confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
+    const target = document.getElementById('layer' + layerNumber);
+    if (target) target.classList.add('active');
+    
+    try {
+        if (layerNumber !== 5 && typeof confetti === 'function') {
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
+        }
+    } catch (e) {
+        console.warn('Confetti error:', e);
+    }
 }
 
 // =============================================
@@ -63,33 +71,55 @@ function showToast(message) {
 // ANIMASI SPESIAL
 // =============================================
 function fireHearts() {
-    const defaults = { spread: 360, ticks: 100, gravity: 0, decay: 0.94, startVelocity: 30, shapes: ['heart'], colors: ['#ff477e', '#ff9a9e'] };
-    confetti({ ...defaults, particleCount: 50, scalar: 2 });
-    confetti({ ...defaults, particleCount: 25, scalar: 3 });
+    try {
+        if (typeof confetti === 'function') {
+            const defaults = { spread: 360, ticks: 100, gravity: 0.6, decay: 0.94, startVelocity: 30, colors: ['#ff477e', '#ff9a9e', '#ff0a54'] };
+            confetti({ ...defaults, particleCount: 50, scalar: 1.5 });
+            confetti({ ...defaults, particleCount: 25, scalar: 2 });
+        }
+    } catch (e) {
+        console.warn('Hearts confetti error:', e);
+    }
 }
 
 function fireworksHeboh() {
-    var duration = 20 * 1000;
-    var animationEnd = Date.now() + duration;
-    var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-    var interval = setInterval(function () {
-        var timeLeft = animationEnd - Date.now();
-        if (timeLeft <= 0) return clearInterval(interval);
-        var particleCount = 60 * (timeLeft / duration);
-        confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 } }));
-    }, 250);
+    try {
+        if (typeof confetti === 'function') {
+            var duration = 20 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+            var interval = setInterval(function () {
+                var timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+                var particleCount = 60 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+    } catch (e) {
+        console.warn('Fireworks error:', e);
+    }
 }
 
 // =============================================
 // SUPABASE CONFIG (dipisah biar gak ganggu UI)
 // =============================================
+const SUPABASE_URL = 'https://iqokqdzsvezrapqtrecg.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_h-yn14F5rf8QNATaMejR_g_NVcu4nFb';
 let db = null;
 
+function getSupabase() {
+    if (db) return db;
+    const clientCreator = (window.supabase && window.supabase.createClient) || (typeof supabase !== 'undefined' && supabase.createClient);
+    if (clientCreator) {
+        db = clientCreator(SUPABASE_URL, SUPABASE_ANON_KEY);
+        return db;
+    }
+    return null;
+}
+
 try {
-    const SUPABASE_URL = 'https://iqokqdzsvezrapqtrecg.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_h-yn14F5rf8QNATaMejR_g_NVcu4nFb';
-    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('Supabase connected!');
+    getSupabase();
+    console.log('Supabase initialized!');
 } catch (err) {
     console.error('Supabase init error:', err);
 }
@@ -98,10 +128,13 @@ try {
 // UPLOAD FOTO KE SUPABASE STORAGE
 // =============================================
 async function uploadPhoto(file, folder, index) {
+    const client = getSupabase();
+    if (!client) throw new Error("Supabase client belum siap");
+
     const fileExt = file.name.split('.').pop();
     const fileName = `${folder}/${Date.now()}_${index}.${fileExt}`;
 
-    const { data, error } = await db.storage
+    const { data, error } = await client.storage
         .from('birthday-photos')
         .upload(fileName, file, {
             cacheControl: '3600',
@@ -113,7 +146,7 @@ async function uploadPhoto(file, folder, index) {
         throw error;
     }
 
-    const { data: urlData } = db.storage
+    const { data: urlData } = client.storage
         .from('birthday-photos')
         .getPublicUrl(fileName);
 
@@ -124,8 +157,9 @@ async function uploadPhoto(file, folder, index) {
 // SIMPAN & BUAT LINK SHARE
 // =============================================
 async function saveAndShare() {
-    if (!db) {
-        showToast("Supabase belum terhubung! Cek console.");
+    const client = getSupabase();
+    if (!client) {
+        showToast("Supabase belum terhubung! Cek console browser.");
         return;
     }
 
@@ -178,7 +212,7 @@ async function saveAndShare() {
         progressText.innerText = 'Menyimpan data...';
 
         // 3. Simpan data teks + URL foto ke Supabase Database
-        const { data, error } = await db
+        const { data, error } = await client
             .from('birthdays')
             .insert({
                 text1: document.getElementById('text1').innerHTML,
@@ -246,12 +280,13 @@ function checkUrlMode() {
 // LOAD DATA DARI SUPABASE
 // =============================================
 async function loadDataFromSupabase(id) {
-    if (!db) {
+    const client = getSupabase();
+    if (!client) {
         showToast("Supabase belum terhubung!");
         return;
     }
 
-    const { data, error } = await db
+    const { data, error } = await client
         .from('birthdays')
         .select('*')
         .eq('id', id)
