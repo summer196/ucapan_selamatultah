@@ -229,32 +229,46 @@ try {
 }
 
 // =============================================
-// UPLOAD FOTO KE SUPABASE STORAGE
+// UPLOAD FOTO KE SUPABASE STORAGE (DENGAN FALLBACK BASE64)
 // =============================================
 async function uploadPhoto(file, folder, index) {
     const client = getSupabase();
-    if (!client) throw new Error("Supabase client belum siap");
+    
+    // Coba upload ke Supabase Storage terlebih dahulu
+    if (client) {
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${folder}/${Date.now()}_${index}.${fileExt}`;
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${folder}/${Date.now()}_${index}.${fileExt}`;
+            const { data, error } = await client.storage
+                .from('birthday-photos')
+                .upload(fileName, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
 
-    const { data, error } = await client.storage
-        .from('birthday-photos')
-        .upload(fileName, file, {
-            cacheControl: '3600',
-            upsert: false
-        });
-
-    if (error) {
-        console.error('Upload error:', error);
-        throw error;
+            if (!error) {
+                const { data: urlData } = client.storage
+                    .from('birthday-photos')
+                    .getPublicUrl(fileName);
+                if (urlData && urlData.publicUrl) {
+                    return urlData.publicUrl;
+                }
+            } else {
+                console.warn('Supabase storage upload gagal, beralih ke fallback base64:', error.message);
+            }
+        } catch (storageErr) {
+            console.warn('Storage exception, beralih ke fallback base64:', storageErr);
+        }
     }
 
-    const { data: urlData } = client.storage
-        .from('birthday-photos')
-        .getPublicUrl(fileName);
-
-    return urlData.publicUrl;
+    // Fallback otomatis ke Base64 (Data URL) jika bucket belum dibuat atau storage bermasalah
+    // Ini menjamin foto tetap tersimpan & tidak pernah gagal!
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.readAsDataURL(file);
+    });
 }
 
 // =============================================
