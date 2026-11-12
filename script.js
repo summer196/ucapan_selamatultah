@@ -65,43 +65,73 @@ document.addEventListener('click', function startOnFirstInteraction() {
 }, { once: true });
 
 // =============================================
-// MINI GAME — Tombol Kabur & Kotak Misteri
+// MINI GAME — Tombol Kabur (10x) & Kotak Misteri (10 Kotak)
 // =============================================
 let dodgeCount = 0;
+const dodgeMessages = [
+    "Wleee gak kena! 😜",
+    "Eits kabur lagi! 💨",
+    "Masa nangkep tombol aja gabisa? 😂",
+    "Hampir dapet tuh, coba lagi! 🏃‍♂️",
+    "Kecepetan tangan kamu kurang nih! ⚡",
+    "Wkwkwk capek ya? Masih separuh jalan! 🤪",
+    "Ayo semangat, dikit lagi! 🔥",
+    "Yakin bisa nangkep? 😏",
+    "Satu kali lagi nih beneran! 😤",
+    "Ampunnn ampun capek lari, boleh diklik sekarang! 🥺🎁"
+];
+
 function dodgeButton() {
-    if (document.body.classList.contains('view-mode') && dodgeCount < 3) {
+    if (document.body.classList.contains('view-mode') && dodgeCount < 10) {
         const btn = document.getElementById('runawayBtn');
         const container = document.getElementById('layer3');
-        const maxX = container.clientWidth - btn.clientWidth;
-        const maxY = container.clientHeight - btn.clientHeight;
+        const maxX = Math.max(10, container.clientWidth - btn.clientWidth - 30);
+        const maxY = Math.max(10, container.clientHeight - btn.clientHeight - 30);
 
         btn.style.position = 'absolute';
         btn.style.left = Math.floor(Math.random() * maxX) + 'px';
         btn.style.top = Math.floor(Math.random() * maxY) + 'px';
+        
+        btn.innerHTML = dodgeMessages[dodgeCount] || "🎁 Tangkap Aku!";
         dodgeCount++;
-        if (dodgeCount === 3) btn.innerHTML = "Yaudah deh, nyerah. Boleh klik! 🙄";
+
+        if (dodgeCount >= 10) {
+            btn.innerHTML = "Ampunnn capek! Boleh diklik sekarang 🥺🎁";
+            btn.style.background = "linear-gradient(135deg, #06d6a0 0%, #118ab2 100%)";
+        }
     }
 }
 
-let winningBox = Math.floor(Math.random() * 3) + 1;
+let winningBox = Math.floor(Math.random() * 10) + 1;
 const zonkList = [
-    { icon: "💸", text: "Zonk! Isinya tagihan Paylater 🤣" },
-    { icon: "🐸", text: "Zonk! Isinya janji manis palsu 😜" },
-    { icon: "🍜", text: "Zonk! Isinya bungkus mie instan kosong 😭" },
-    { icon: "🧦", text: "Zonk! Isinya kaos kaki sebelah doang 🦨" },
-    { icon: "🧀", text: "Zonk! Isinya gombalan basi wkwk 🧀" }
+    { icon: "💸", text: "Tagihan ShopeePay 🤣" },
+    { icon: "🐸", text: "Janji manis palsu 😜" },
+    { icon: "🍜", text: "Bungkus mie kosong 😭" },
+    { icon: "🧦", text: "Kaos kaki bolong 🦨" },
+    { icon: "🧀", text: "Gombalan basi wkwk 🧀" },
+    { icon: "🍽️", text: "Voucher cuci piring 🍽️" },
+    { icon: "💨", text: "Angin doang wkwk 💨" },
+    { icon: "📸", text: "Foto aib pas mangap 😜" },
+    { icon: "🐻", text: "Kupon peluk tapi bayar 5000 🐻" },
+    { icon: "💔", text: "Harapan palsu 🗿" },
+    { icon: "🪳", text: "Kecoa terbang kabur 🪳" },
+    { icon: "🥱", text: "Rasa ngantuk tak tertahan 😴" }
 ];
 
 let game2Solved = false;
 
 function passStage1() {
+    if (document.body.classList.contains('view-mode') && dodgeCount < 10) {
+        dodgeButton();
+        return;
+    }
     document.getElementById('gameStage1').style.display = 'none';
     const stage2 = document.getElementById('gameStage2');
     stage2.style.display = 'block';
     
-    // acak ulang winning box setiap stage dibuka
-    winningBox = Math.floor(Math.random() * 3) + 1;
-    showToast("Masuk Ronde 2! Tebak kotak yang benar 🎁");
+    // acak ulang winning box di antara 1 - 10
+    winningBox = Math.floor(Math.random() * 10) + 1;
+    showToast("Masuk Ronde 2! Tebak 1 dari 10 kotak 🎁");
 }
 
 function openBox(index) {
@@ -118,23 +148,23 @@ function openBox(index) {
         card.classList.remove('opened-zonk');
         card.classList.add('opened-win');
         icon.innerText = "🗝️✨";
-        res.innerHTML = "<span style='color: #2b9348;'>Kunci Hati Ditemukan! 💖</span>";
+        res.innerHTML = "<span style='color: #2b9348; font-weight: bold;'>Kunci Hati! 💖</span>";
         res.style.display = 'block';
-        hint.innerHTML = "🎉 BINGOO!! Kamu berhasil nemuin kado aslinya! Silakan lanjut ke babak memori.";
+        hint.innerHTML = "🎉 BINGOO!! Di antara 10 kotak, kamu nemuin Kunci Hati yang asli! Silakan lanjut ke memori kita.";
         document.getElementById('stage2NextBtn').style.display = 'inline-block';
         
         try {
             if (typeof confetti === 'function') {
-                confetti({ particleCount: 80, spread: 80, origin: { y: 0.6 } });
+                confetti({ particleCount: 90, spread: 90, origin: { y: 0.6 } });
             }
         } catch(e) {}
     } else {
         card.classList.add('opened-zonk');
-        const randomZonk = zonkList[Math.floor(Math.random() * zonkList.length)];
+        const randomZonk = zonkList[(index - 1) % zonkList.length];
         icon.innerText = randomZonk.icon;
         res.innerText = randomZonk.text;
         res.style.display = 'block';
-        hint.innerText = "Tetottt! Kotak " + (index === 1 ? 'A' : (index === 2 ? 'B' : 'C')) + " isinya zonk! Coba tebak kotak lain 😜";
+        hint.innerText = "Tetottt! Kotak " + index + " isinya zonk! Coba tebak kotak lain 😜";
     }
 }
 

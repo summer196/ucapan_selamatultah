@@ -42,30 +42,25 @@
         <div id="layer3" class="layer game-layer">
             <div id="gameStage1">
                 <h1 id="text3" contenteditable="true">Eits, Tunggu Dulu! 🛑</h1>
-                <p id="sub3" contenteditable="true">Sebelum lanjut, coba tangkap kado ini kalau bisa! 😜</p>
-                <button class="btn game-btn" id="runawayBtn" onmouseover="dodgeButton()" onclick="passStage1()">🎁 Tangkap Aku!</button>
+                <p id="sub3" contenteditable="true">Sebelum lanjut, coba tangkap kado ini kalau bisa! (Kejar terus 10x! 😜)</p>
+                <button class="btn game-btn" id="runawayBtn" onmouseover="dodgeButton()" ontouchstart="dodgeButton()" onclick="passStage1()">🎁 Tangkap Aku!</button>
             </div>
 
-            <!-- STAGE 2: Tebak Kotak Kado Misteri -->
+            <!-- STAGE 2: Tebak Kotak Kado Misteri (10 Kotak) -->
             <div id="gameStage2" style="display: none;">
                 <h1>Ronde 2: Tebak Kado Asli! 😈</h1>
-                <p>Hahaha lumayan gesit juga! Tapi jangan senang dulu, kado aslinya disembunyiin di salah satu kotak ini. Tebak mana yang isinya kunci galeri?</p>
-                <div class="mystery-boxes">
-                    <div class="box-card" onclick="openBox(1)">
-                        <div class="box-icon" id="boxIcon1">🎁</div>
-                        <div class="box-label">Kotak A</div>
-                        <div class="box-result" id="boxRes1"></div>
-                    </div>
-                    <div class="box-card" onclick="openBox(2)">
-                        <div class="box-icon" id="boxIcon2">🎁</div>
-                        <div class="box-label">Kotak B</div>
-                        <div class="box-result" id="boxRes2"></div>
-                    </div>
-                    <div class="box-card" onclick="openBox(3)">
-                        <div class="box-icon" id="boxIcon3">🎁</div>
-                        <div class="box-label">Kotak C</div>
-                        <div class="box-result" id="boxRes3"></div>
-                    </div>
+                <p>Hahaha capek kan nangkepnya! Tapi kado aslinya disembunyiin di salah satu dari 10 kotak ini. Tebak mana yang isinya kunci galeri?</p>
+                <div class="mystery-boxes" id="mysteryBoxesGrid">
+                    <div class="box-card" onclick="openBox(1)"><div class="box-icon" id="boxIcon1">🎁</div><div class="box-label">Kotak 1</div><div class="box-result" id="boxRes1"></div></div>
+                    <div class="box-card" onclick="openBox(2)"><div class="box-icon" id="boxIcon2">🎁</div><div class="box-label">Kotak 2</div><div class="box-result" id="boxRes2"></div></div>
+                    <div class="box-card" onclick="openBox(3)"><div class="box-icon" id="boxIcon3">🎁</div><div class="box-label">Kotak 3</div><div class="box-result" id="boxRes3"></div></div>
+                    <div class="box-card" onclick="openBox(4)"><div class="box-icon" id="boxIcon4">🎁</div><div class="box-label">Kotak 4</div><div class="box-result" id="boxRes4"></div></div>
+                    <div class="box-card" onclick="openBox(5)"><div class="box-icon" id="boxIcon5">🎁</div><div class="box-label">Kotak 5</div><div class="box-result" id="boxRes5"></div></div>
+                    <div class="box-card" onclick="openBox(6)"><div class="box-icon" id="boxIcon6">🎁</div><div class="box-label">Kotak 6</div><div class="box-result" id="boxRes6"></div></div>
+                    <div class="box-card" onclick="openBox(7)"><div class="box-icon" id="boxIcon7">🎁</div><div class="box-label">Kotak 7</div><div class="box-result" id="boxRes7"></div></div>
+                    <div class="box-card" onclick="openBox(8)"><div class="box-icon" id="boxIcon8">🎁</div><div class="box-label">Kotak 8</div><div class="box-result" id="boxRes8"></div></div>
+                    <div class="box-card" onclick="openBox(9)"><div class="box-icon" id="boxIcon9">🎁</div><div class="box-label">Kotak 9</div><div class="box-result" id="boxRes9"></div></div>
+                    <div class="box-card" onclick="openBox(10)"><div class="box-icon" id="boxIcon10">🎁</div><div class="box-label">Kotak 10</div><div class="box-result" id="boxRes10"></div></div>
                 </div>
                 <p id="game2Hint" style="font-size: 1.05em; color: #e63968; min-height: 28px; margin-top: 15px; font-weight: 600;"></p>
                 <button class="btn" id="stage2NextBtn" style="display: none; margin-top: 15px;" onclick="nextLayer(4); fireHearts();">Buka Kunci Galeri Kenangan! 🗝️✨</button>
