@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kejutan Spesial!</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="glass-container" id="mainContainer">
+        
+        <!-- LAPIS 1: Pembuka -->
+        <div id="layer1" class="layer active">
+            <h1 id="text1" contenteditable="true">Halooo... 👀</h1>
+            <p id="sub1" contenteditable="true">Ada yang lagi ulang tahun nih kayaknya? Bener gak sih?</p>
+            <button class="btn" onclick="nextLayer(2)">Coba Buktikan ➡️</button>
+        </div>
+
+        <!-- LAPIS 2: Foto Utama & Romantis -->
+        <div id="layer2" class="layer">
+            <h1 id="text2" contenteditable="true">Oh Ternyata Bidadari Ini! 💖</h1>
+            <div class="photo-grid main-photos" id="mainPhotoGrid">
+                <div class="photo-slot"><input type="file" accept="image/*" class="uploader edit-only" onchange="previewImage(this)"><img src="" alt="" class="preview-img"></div>
+                <div class="photo-slot"><input type="file" accept="image/*" class="uploader edit-only" onchange="previewImage(this)"><img src="" alt="" class="preview-img"></div>
+                <div class="photo-slot"><input type="file" accept="image/*" class="uploader edit-only" onchange="previewImage(this)"><img src="" alt="" class="preview-img"></div>
+            </div>
+            <p id="sub2" contenteditable="true">Cakep amat sih hari ini. Gak kerasa udah nambah tua aja ya~</p>
+            <button class="btn" onclick="nextLayer(3); fireHearts();">Lanjut Dong ➡️</button>
+        </div>
+
+        <!-- LAPIS 3: Mini Game Ngeselin -->
+        <div id="layer3" class="layer game-layer">
+            <h1 id="text3" contenteditable="true">Eits, Tunggu Dulu! 🛑</h1>
+            <p id="sub3" contenteditable="true">Sebelum lanjut, coba tangkap kado ini kalau bisa! 😜</p>
+            <button class="btn game-btn" id="runawayBtn" onmouseover="dodgeButton()" onclick="nextLayer(4)">🎁 Tangkap Aku!</button>
+        </div>
+
+        <!-- LAPIS 4: Galeri Memori -->
+        <div id="layer4" class="layer">
+            <h1 id="text4" contenteditable="true">Hahaha Pinter! 👏</h1>
+            <p id="sub4" contenteditable="true">Nah, ini dia rangkuman memori kita. Dari yang aib sampai yang manis.</p>
+            <div class="message-box" id="longMessage" contenteditable="true">
+                (Tulis pesan panjang, doa, dan harapanmu di sini...)
+            </div>
+            <div class="photo-grid gallery-photos" id="galleryGrid"></div>
+            <button class="btn edit-only add-gallery-btn" onclick="addGallerySlot()">+ Tambah Slot Foto Galeri</button>
+            <br>
+            <button class="btn" onclick="nextLayer(5); fireworksHeboh();">Satu Klik Lagi Buat Kejutan Utama! 🚀</button>
+        </div>
+
+        <!-- LAPIS 5: Puncak Kejutan & Save -->
+        <div id="layer5" class="layer">
+            <h1 id="text5" contenteditable="true">🎉 SELAMAT ULANG TAHUN! 🎉</h1>
+            <p id="sub5" contenteditable="true">Semoga semua doa dan harapanmu terkabul ya! I love you! ❤️</p>
+            
+            <div class="action-section edit-only" style="margin-top: 40px; border-top: 2px dashed #ff9a9e; padding-top: 20px;">
+                <p style="font-size: 0.9em;">(Area ini hanya terlihat olehmu untuk menyimpan & share link)</p>
+                <button class="btn save-btn" onclick="saveAndShare()">Simpan & Buat Link Share</button>
+                <p id="shareLinkContainer" style="display: none;">
+                    Bagikan link ini: <br>
+                    <a href="#" id="shareLink" target="_blank" style="color: #ff3366; font-weight: bold;"></a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+    <div id="toast">Notifikasi muncul di sini</div>
+    <script src="script.js"></script>
+</body>
+</html>
