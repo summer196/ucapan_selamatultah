@@ -299,6 +299,24 @@ p {
 @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
 @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
 
-body.view-mode .edit-only { display: none !important; }
-body.view-mode [contenteditable="true"] { border-bottom: none; pointer-events: none; }
-body.view-mode .photo-slot { border: none; background: transparent; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12); }
+/* Mode Lihat (View-Only / Pacar Mode) */
+body.view-mode .edit-only { 
+    display: none !important; 
+}
+body.view-mode [contenteditable],
+body.view-mode [contenteditable="true"],
+body.view-mode [contenteditable="false"] { 
+    border-bottom: none !important; 
+    cursor: default !important;
+    user-select: text;
+    -webkit-user-modify: read-only !important;
+}
+body.view-mode .photo-slot { 
+    border: none !important; 
+    background: transparent !important; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12); 
+}
+body.view-mode .uploader {
+    display: none !important;
+    pointer-events: none !important;
+}

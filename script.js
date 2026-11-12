@@ -420,6 +420,17 @@ function checkUrlMode() {
     const id = params.get('id');
     if (id) {
         document.body.classList.add('view-mode');
+        
+        // Hapus atribut contenteditable agar 100% terkunci permanen
+        document.querySelectorAll('[contenteditable]').forEach(el => {
+            el.removeAttribute('contenteditable');
+        });
+
+        // Hapus semua uploader foto agar tidak bisa disentuh
+        document.querySelectorAll('input.uploader').forEach(input => {
+            input.remove();
+        });
+
         loadDataFromSupabase(id);
     }
 }
@@ -457,6 +468,11 @@ async function loadDataFromSupabase(id) {
     document.getElementById('text5').innerHTML = data.text5;
     document.getElementById('sub5').innerHTML = data.sub5;
     document.getElementById('longMessage').innerHTML = data.long_message;
+
+    // Pastikan lagi setelah render teks, semua contenteditable benar-benar hilang
+    document.querySelectorAll('[contenteditable]').forEach(el => {
+        el.removeAttribute('contenteditable');
+    });
 
     // Load Main Photos
     const mainGrid = document.getElementById('mainPhotoGrid');
