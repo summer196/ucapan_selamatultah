@@ -381,9 +381,95 @@ async function loadDataFromSupabase(id) {
 }
 
 // =============================================
+// AMBIENT FALLING HEARTS & CONFETTI ENGINE
+// =============================================
+function initAmbientParticles() {
+    const canvas = document.getElementById('ambientCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    });
+
+    const hearts = ['💖', '💕', '❤️', '🌸', '✨'];
+    const confettiColors = ['#ff477e', '#ff9a9e', '#ffd166', '#06d6a0', '#118ab2', '#ff70a6', '#ffffff'];
+
+    const particleCount = 45;
+    const particles = [];
+
+    function createParticle(randomY = false) {
+        const isHeart = Math.random() > 0.45;
+        return {
+            x: Math.random() * width,
+            y: randomY ? Math.random() * height : -30,
+            size: isHeart ? (16 + Math.random() * 14) : (6 + Math.random() * 8),
+            speedY: 1.0 + Math.random() * 2.0,
+            angle: Math.random() * Math.PI * 2,
+            angularSpeed: (Math.random() - 0.5) * 0.05,
+            isHeart: isHeart,
+            symbol: hearts[Math.floor(Math.random() * hearts.length)],
+            color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+            opacity: 0.65 + Math.random() * 0.35,
+            oscillationSpeed: 0.02 + Math.random() * 0.03,
+            oscillationDistance: 15 + Math.random() * 25,
+            baseX: Math.random() * width,
+            time: Math.random() * 100
+        };
+    }
+
+    for (let i = 0; i < particleCount; i++) {
+        particles.push(createParticle(true));
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            p.time += p.oscillationSpeed;
+            p.y += p.speedY;
+            p.x = p.baseX + Math.sin(p.time) * p.oscillationDistance;
+            p.angle += p.angularSpeed;
+
+            ctx.save();
+            ctx.globalAlpha = p.opacity;
+
+            if (p.isHeart) {
+                ctx.font = `${p.size}px serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(p.symbol, p.x, p.y);
+            } else {
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.angle);
+                ctx.fillStyle = p.color;
+                const scaleY = Math.cos(p.time * 2);
+                ctx.fillRect(-p.size / 2, (-p.size * scaleY) / 2, p.size, p.size * scaleY);
+            }
+
+            ctx.restore();
+
+            if (p.y > height + 40 || p.x < -40 || p.x > width + 40) {
+                particles[i] = createParticle(false);
+                particles[i].baseX = Math.random() * width;
+            }
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+}
+
+// =============================================
 // INIT
 // =============================================
 window.onload = () => {
     for (let i = 0; i < 4; i++) addGallerySlot();
     checkUrlMode();
+    initAmbientParticles();
 };
