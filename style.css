@@ -1,7 +1,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, rgba(15, 15, 25, 0.35) 0%, rgba(20, 10, 20, 0.45) 100%), 
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0.18) 100%), 
                 url('bg.jpg') center/cover no-repeat fixed;
     min-height: 100vh;
     padding: 20px;
@@ -11,18 +11,19 @@ body {
     overflow-x: hidden;
 }
 .glass-container {
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.32);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 24px;
-    padding: 40px;
+    padding: 35px 25px;
     max-width: 800px;
     width: 100%;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
     text-align: center;
     min-height: 60vh;
     position: relative;
+    z-index: 20;
 }
 
 /* Sistem Layering */
@@ -31,46 +32,48 @@ body {
 @keyframes popIn { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
 h1 { 
-    color: #e63968; 
+    color: #ff1a53; 
     font-size: 2.2em; 
     margin-bottom: 15px; 
     outline: none; 
-    font-weight: 700;
-    text-shadow: 0 2px 10px rgba(230, 57, 104, 0.15);
+    font-weight: 800;
+    text-shadow: 0 2px 10px rgba(255, 255, 255, 0.9), 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 p { 
-    color: #2b2d42; 
+    color: #1a1a2e; 
     font-size: 1.15em; 
-    font-weight: 500;
+    font-weight: 600;
     margin-bottom: 25px; 
     outline: none; 
     line-height: 1.7; 
+    text-shadow: 0 1px 6px rgba(255, 255, 255, 0.85);
 }
 [contenteditable="true"] { border-bottom: 2px dashed #ff477e; transition: all 0.3s ease; }
-[contenteditable="true"]:focus { background: rgba(255, 255, 255, 0.85); border-radius: 6px; }
+[contenteditable="true"]:focus { background: rgba(255, 255, 255, 0.7); border-radius: 6px; }
 
 .photo-grid { display: grid; gap: 15px; margin-bottom: 30px; }
 .main-photos { grid-template-columns: repeat(3, 1fr); }
 .gallery-photos { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
 .photo-slot {
-    background: rgba(255, 255, 255, 0.65); 
-    border: 2px dashed #ff9a9e;
+    background: rgba(255, 255, 255, 0.38); 
+    border: 2px dashed rgba(255, 71, 126, 0.8);
     border-radius: 16px; 
     aspect-ratio: 1; 
     position: relative; 
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 .uploader { position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2; }
 .preview-img { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 1; display: none; }
 
 .message-box {
-    background: rgba(255, 255, 255, 0.8); 
+    background: rgba(255, 255, 255, 0.45); 
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    color: #1f2421;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    color: #111;
     font-size: 1.05em;
+    font-weight: 500;
     padding: 24px; 
     border-radius: 16px;
     min-height: 100px; 
@@ -78,7 +81,8 @@ p {
     outline: none; 
     text-align: left;
     line-height: 1.8;
-    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.04), 0 4px 20px rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.04), 0 4px 20px rgba(0, 0, 0, 0.06);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
 }
 
 .btn {
@@ -122,10 +126,10 @@ p {
     }
 }
 .box-card {
-    background: rgba(255, 255, 255, 0.78);
+    background: rgba(255, 255, 255, 0.45);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border: 2px solid rgba(255, 71, 126, 0.35);
+    border: 2px solid rgba(255, 71, 126, 0.4);
     border-radius: 16px;
     padding: 12px 6px;
     cursor: pointer;
@@ -139,8 +143,8 @@ p {
 .box-card:hover {
     transform: translateY(-4px) scale(1.06);
     border-color: #ff477e;
-    box-shadow: 0 10px 22px rgba(255, 71, 126, 0.28);
-    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 10px 22px rgba(255, 71, 126, 0.35);
+    background: rgba(255, 255, 255, 0.75);
 }
 .box-card.opened-zonk {
     background: rgba(255, 230, 230, 0.9);
