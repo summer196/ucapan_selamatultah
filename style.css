@@ -209,6 +209,54 @@ p {
     50% { transform: scale(1.02); }
 }
 
+/* Floating Music Toggle */
+.music-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 30px;
+    padding: 8px 16px 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    user-select: none;
+}
+.music-toggle:hover {
+    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 10px 28px rgba(255, 71, 126, 0.3);
+}
+.music-disc {
+    font-size: 1.3em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    transition: transform 0.3s;
+}
+.music-toggle.playing .music-disc {
+    animation: spinDisc 3s linear infinite;
+}
+.music-text {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #e63968;
+    white-space: nowrap;
+}
+@keyframes spinDisc {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 /* Ambient Particles Canvas */
 #ambientCanvas {
     position: fixed;

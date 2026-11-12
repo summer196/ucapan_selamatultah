@@ -10,6 +10,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
+    <!-- Floating Music Toggle -->
+    <div class="music-toggle" id="musicToggle" onclick="toggleMusic()" title="Putar / Jeda Musik">
+        <div class="music-disc" id="musicDisc">💿</div>
+        <span class="music-text" id="musicText">Musik: ON 🎵</span>
+    </div>
+    <audio id="bgMusic" src="music.mp3" loop preload="auto"></audio>
+
     <div class="glass-container" id="mainContainer">
         
         <!-- LAPIS 1: Pembuka -->

@@ -2,6 +2,7 @@
 // NAVIGASI LAYER (ini harus jalan duluan)
 // =============================================
 function nextLayer(layerNumber) {
+    playMusic();
     document.querySelectorAll('.layer').forEach(layer => layer.classList.remove('active'));
     const target = document.getElementById('layer' + layerNumber);
     if (target) target.classList.add('active');
@@ -14,6 +15,54 @@ function nextLayer(layerNumber) {
         console.warn('Confetti error:', e);
     }
 }
+
+// =============================================
+// BACKGROUND MUSIC CONTROLLER
+// =============================================
+let musicStarted = false;
+
+function playMusic() {
+    const audio = document.getElementById('bgMusic');
+    const toggle = document.getElementById('musicToggle');
+    const text = document.getElementById('musicText');
+    if (!audio) return;
+
+    audio.play().then(() => {
+        musicStarted = true;
+        if (toggle) toggle.classList.add('playing');
+        if (text) text.innerText = 'Musik: ON 🎵';
+    }).catch(err => {
+        console.log('Autoplay waiting for user interaction:', err);
+    });
+}
+
+function pauseMusic() {
+    const audio = document.getElementById('bgMusic');
+    const toggle = document.getElementById('musicToggle');
+    const text = document.getElementById('musicText');
+    if (!audio) return;
+
+    audio.pause();
+    if (toggle) toggle.classList.remove('playing');
+    if (text) text.innerText = 'Musik: OFF 🔇';
+}
+
+function toggleMusic() {
+    const audio = document.getElementById('bgMusic');
+    if (!audio) return;
+    if (audio.paused) {
+        playMusic();
+    } else {
+        pauseMusic();
+    }
+}
+
+// Auto-start on first user interaction anywhere on the page
+document.addEventListener('click', function startOnFirstInteraction() {
+    if (!musicStarted) {
+        playMusic();
+    }
+}, { once: true });
 
 // =============================================
 // MINI GAME — Tombol Kabur & Kotak Misteri
