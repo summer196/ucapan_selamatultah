@@ -16,7 +16,7 @@ function nextLayer(layerNumber) {
 }
 
 // =============================================
-// MINI GAME — Tombol Kabur
+// MINI GAME — Tombol Kabur & Kotak Misteri
 // =============================================
 let dodgeCount = 0;
 function dodgeButton() {
@@ -31,6 +31,61 @@ function dodgeButton() {
         btn.style.top = Math.floor(Math.random() * maxY) + 'px';
         dodgeCount++;
         if (dodgeCount === 3) btn.innerHTML = "Yaudah deh, nyerah. Boleh klik! 🙄";
+    }
+}
+
+let winningBox = Math.floor(Math.random() * 3) + 1;
+const zonkList = [
+    { icon: "💸", text: "Zonk! Isinya tagihan Paylater 🤣" },
+    { icon: "🐸", text: "Zonk! Isinya janji manis palsu 😜" },
+    { icon: "🍜", text: "Zonk! Isinya bungkus mie instan kosong 😭" },
+    { icon: "🧦", text: "Zonk! Isinya kaos kaki sebelah doang 🦨" },
+    { icon: "🧀", text: "Zonk! Isinya gombalan basi wkwk 🧀" }
+];
+
+let game2Solved = false;
+
+function passStage1() {
+    document.getElementById('gameStage1').style.display = 'none';
+    const stage2 = document.getElementById('gameStage2');
+    stage2.style.display = 'block';
+    
+    // acak ulang winning box setiap stage dibuka
+    winningBox = Math.floor(Math.random() * 3) + 1;
+    showToast("Masuk Ronde 2! Tebak kotak yang benar 🎁");
+}
+
+function openBox(index) {
+    if (game2Solved) return;
+
+    const cards = document.querySelectorAll('.box-card');
+    const card = cards[index - 1];
+    const icon = document.getElementById('boxIcon' + index);
+    const res = document.getElementById('boxRes' + index);
+    const hint = document.getElementById('game2Hint');
+
+    if (index === winningBox) {
+        game2Solved = true;
+        card.classList.remove('opened-zonk');
+        card.classList.add('opened-win');
+        icon.innerText = "🗝️✨";
+        res.innerHTML = "<span style='color: #2b9348;'>Kunci Hati Ditemukan! 💖</span>";
+        res.style.display = 'block';
+        hint.innerHTML = "🎉 BINGOO!! Kamu berhasil nemuin kado aslinya! Silakan lanjut ke babak memori.";
+        document.getElementById('stage2NextBtn').style.display = 'inline-block';
+        
+        try {
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 80, spread: 80, origin: { y: 0.6 } });
+            }
+        } catch(e) {}
+    } else {
+        card.classList.add('opened-zonk');
+        const randomZonk = zonkList[Math.floor(Math.random() * zonkList.length)];
+        icon.innerText = randomZonk.icon;
+        res.innerText = randomZonk.text;
+        res.style.display = 'block';
+        hint.innerText = "Tetottt! Kotak " + (index === 1 ? 'A' : (index === 2 ? 'B' : 'C')) + " isinya zonk! Coba tebak kotak lain 😜";
     }
 }
 

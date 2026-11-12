@@ -33,9 +33,36 @@
 
         <!-- LAPIS 3: Mini Game Ngeselin -->
         <div id="layer3" class="layer game-layer">
-            <h1 id="text3" contenteditable="true">Eits, Tunggu Dulu! 🛑</h1>
-            <p id="sub3" contenteditable="true">Sebelum lanjut, coba tangkap kado ini kalau bisa! 😜</p>
-            <button class="btn game-btn" id="runawayBtn" onmouseover="dodgeButton()" onclick="nextLayer(4)">🎁 Tangkap Aku!</button>
+            <div id="gameStage1">
+                <h1 id="text3" contenteditable="true">Eits, Tunggu Dulu! 🛑</h1>
+                <p id="sub3" contenteditable="true">Sebelum lanjut, coba tangkap kado ini kalau bisa! 😜</p>
+                <button class="btn game-btn" id="runawayBtn" onmouseover="dodgeButton()" onclick="passStage1()">🎁 Tangkap Aku!</button>
+            </div>
+
+            <!-- STAGE 2: Tebak Kotak Kado Misteri -->
+            <div id="gameStage2" style="display: none;">
+                <h1>Ronde 2: Tebak Kado Asli! 😈</h1>
+                <p>Hahaha lumayan gesit juga! Tapi jangan senang dulu, kado aslinya disembunyiin di salah satu kotak ini. Tebak mana yang isinya kunci galeri?</p>
+                <div class="mystery-boxes">
+                    <div class="box-card" onclick="openBox(1)">
+                        <div class="box-icon" id="boxIcon1">🎁</div>
+                        <div class="box-label">Kotak A</div>
+                        <div class="box-result" id="boxRes1"></div>
+                    </div>
+                    <div class="box-card" onclick="openBox(2)">
+                        <div class="box-icon" id="boxIcon2">🎁</div>
+                        <div class="box-label">Kotak B</div>
+                        <div class="box-result" id="boxRes2"></div>
+                    </div>
+                    <div class="box-card" onclick="openBox(3)">
+                        <div class="box-icon" id="boxIcon3">🎁</div>
+                        <div class="box-label">Kotak C</div>
+                        <div class="box-result" id="boxRes3"></div>
+                    </div>
+                </div>
+                <p id="game2Hint" style="font-size: 1.05em; color: #e63968; min-height: 28px; margin-top: 15px; font-weight: 600;"></p>
+                <button class="btn" id="stage2NextBtn" style="display: none; margin-top: 15px;" onclick="nextLayer(4); fireHearts();">Buka Kunci Galeri Kenangan! 🗝️✨</button>
+            </div>
         </div>
 
         <!-- LAPIS 4: Galeri Memori -->
