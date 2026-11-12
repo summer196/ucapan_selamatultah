@@ -1,21 +1,5 @@
 // =============================================
-// SUPABASE CONFIG
-// =============================================
-const SUPABASE_URL = 'https://iqokqdzsvezrapqtrecg.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_h-yn14F5rf8QNATaMejR_g_NVcu4nFb';
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// =============================================
-// INIT
-// =============================================
-window.onload = () => {
-    for (let i = 0; i < 4; i++) addGallerySlot();
-    checkUrlMode();
-};
-
-// =============================================
-// NAVIGASI LAYER
+// NAVIGASI LAYER (ini harus jalan duluan)
 // =============================================
 function nextLayer(layerNumber) {
     document.querySelectorAll('.layer').forEach(layer => layer.classList.remove('active'));
@@ -66,13 +50,58 @@ function previewImage(input) {
 }
 
 // =============================================
+// TOAST NOTIFICATION
+// =============================================
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.innerText = message;
+    toast.className = "show";
+    setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+}
+
+// =============================================
+// ANIMASI SPESIAL
+// =============================================
+function fireHearts() {
+    const defaults = { spread: 360, ticks: 100, gravity: 0, decay: 0.94, startVelocity: 30, shapes: ['heart'], colors: ['#ff477e', '#ff9a9e'] };
+    confetti({ ...defaults, particleCount: 50, scalar: 2 });
+    confetti({ ...defaults, particleCount: 25, scalar: 3 });
+}
+
+function fireworksHeboh() {
+    var duration = 20 * 1000;
+    var animationEnd = Date.now() + duration;
+    var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+    var interval = setInterval(function () {
+        var timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) return clearInterval(interval);
+        var particleCount = 60 * (timeLeft / duration);
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 } }));
+    }, 250);
+}
+
+// =============================================
+// SUPABASE CONFIG (dipisah biar gak ganggu UI)
+// =============================================
+let db = null;
+
+try {
+    const SUPABASE_URL = 'https://iqokqdzsvezrapqtrecg.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_h-yn14F5rf8QNATaMejR_g_NVcu4nFb';
+    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('Supabase connected!');
+} catch (err) {
+    console.error('Supabase init error:', err);
+}
+
+// =============================================
 // UPLOAD FOTO KE SUPABASE STORAGE
 // =============================================
 async function uploadPhoto(file, folder, index) {
     const fileExt = file.name.split('.').pop();
     const fileName = `${folder}/${Date.now()}_${index}.${fileExt}`;
 
-    const { data, error } = await supabase.storage
+    const { data, error } = await db.storage
         .from('birthday-photos')
         .upload(fileName, file, {
             cacheControl: '3600',
@@ -84,7 +113,7 @@ async function uploadPhoto(file, folder, index) {
         throw error;
     }
 
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = db.storage
         .from('birthday-photos')
         .getPublicUrl(fileName);
 
@@ -95,6 +124,11 @@ async function uploadPhoto(file, folder, index) {
 // SIMPAN & BUAT LINK SHARE
 // =============================================
 async function saveAndShare() {
+    if (!db) {
+        showToast("Supabase belum terhubung! Cek console.");
+        return;
+    }
+
     showToast("Sedang meracik kejutanmu... ⏳");
 
     const progressContainer = document.getElementById('progressContainer');
@@ -119,14 +153,16 @@ async function saveAndShare() {
         let uploaded = 0;
 
         // 2. Upload semua foto
-        progressText.innerText = `Mengupload foto (0/${totalFiles})...`;
         const mainPhotoUrls = [];
-        for (let i = 0; i < mainFiles.length; i++) {
-            const url = await uploadPhoto(mainFiles[i], 'main', i);
-            mainPhotoUrls.push(url);
-            uploaded++;
-            progressBar.style.width = (10 + (uploaded / totalFiles) * 60) + '%';
-            progressText.innerText = `Mengupload foto (${uploaded}/${totalFiles})...`;
+        if (totalFiles > 0) {
+            progressText.innerText = `Mengupload foto (0/${totalFiles})...`;
+            for (let i = 0; i < mainFiles.length; i++) {
+                const url = await uploadPhoto(mainFiles[i], 'main', i);
+                mainPhotoUrls.push(url);
+                uploaded++;
+                progressBar.style.width = (10 + (uploaded / totalFiles) * 60) + '%';
+                progressText.innerText = `Mengupload foto (${uploaded}/${totalFiles})...`;
+            }
         }
 
         const galleryPhotoUrls = [];
@@ -142,7 +178,7 @@ async function saveAndShare() {
         progressText.innerText = 'Menyimpan data...';
 
         // 3. Simpan data teks + URL foto ke Supabase Database
-        const { data, error } = await supabase
+        const { data, error } = await db
             .from('birthdays')
             .insert({
                 text1: document.getElementById('text1').innerHTML,
@@ -210,7 +246,12 @@ function checkUrlMode() {
 // LOAD DATA DARI SUPABASE
 // =============================================
 async function loadDataFromSupabase(id) {
-    const { data, error } = await supabase
+    if (!db) {
+        showToast("Supabase belum terhubung!");
+        return;
+    }
+
+    const { data, error } = await db
         .from('birthdays')
         .select('*')
         .eq('id', id)
@@ -250,32 +291,9 @@ async function loadDataFromSupabase(id) {
 }
 
 // =============================================
-// TOAST NOTIFICATION
+// INIT
 // =============================================
-function showToast(message) {
-    const toast = document.getElementById("toast");
-    toast.innerText = message;
-    toast.className = "show";
-    setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
-}
-
-// =============================================
-// ANIMASI SPESIAL
-// =============================================
-function fireHearts() {
-    const defaults = { spread: 360, ticks: 100, gravity: 0, decay: 0.94, startVelocity: 30, shapes: ['heart'], colors: ['#ff477e', '#ff9a9e'] };
-    confetti({ ...defaults, particleCount: 50, scalar: 2 });
-    confetti({ ...defaults, particleCount: 25, scalar: 3 });
-}
-
-function fireworksHeboh() {
-    var duration = 20 * 1000;
-    var animationEnd = Date.now() + duration;
-    var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-    var interval = setInterval(function () {
-        var timeLeft = animationEnd - Date.now();
-        if (timeLeft <= 0) return clearInterval(interval);
-        var particleCount = 60 * (timeLeft / duration);
-        confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 } }));
-    }, 250);
-}
+window.onload = () => {
+    for (let i = 0; i < 4; i++) addGallerySlot();
+    checkUrlMode();
+};
